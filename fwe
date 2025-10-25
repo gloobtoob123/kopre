@@ -1511,12 +1511,14 @@
 				})
 				library:apply_theme(UIGradient, "contrast", "Color") 
 				
-				library:create("UIPadding", {
+				library:create("UIListLayout", {
 					Parent = background,
 					Name = "",
-					PaddingBottom = dim(0, 4),
-					PaddingLeft = dim(0, 5)
+					Padding = dim(0, -1),
+					SortOrder = Enum.SortOrder.LayoutOrder
 				})
+				
+
 			--  
 
 			-- main window
