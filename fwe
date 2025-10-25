@@ -648,8 +648,8 @@ local arcadeFont = {
 		function library:panel(options) 
 			local cfg = {
 				name = options.text or options.name or "Window", 
-				size = options.size or dim2(0, 530, 0, 590),
-				position = dim2(0, 550, 0, 500),
+				size = options.size or dim2(0, 430, 0, 590),
+				position = dim2(0, 500, 0, 500),
 				anchor_point = options.anchor_point or vec2(0, 0),
 
 				-- button
