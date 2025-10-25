@@ -1518,7 +1518,12 @@
 					SortOrder = Enum.SortOrder.LayoutOrder
 				})
 				
-
+				library:create("UIPadding", {
+					Parent = background,
+					Name = "",
+					PaddingBottom = dim(0, 4),
+					PaddingLeft = dim(0, 5)
+				})
 			--  
 
 			-- main window
