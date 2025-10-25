@@ -1491,7 +1491,7 @@
 				local background = library:create("Frame", {
 					Parent = inline,
 					Name = "",
-					Size = dim2(1, 1, 1, 1),
+					Size = dim2(1, -2, 1, -2),
 					Position = dim2(0, 1, 0, 1),
 					BorderColor3 = rgb(0, 0, 0),
 					BorderSizePixel = 0,
@@ -1510,13 +1510,6 @@
 					}
 				})
 				library:apply_theme(UIGradient, "contrast", "Color") 
-				
-				library:create("UIListLayout", {
-					Parent = background,
-					Name = "",
-					Padding = dim(0, -1),
-					SortOrder = Enum.SortOrder.LayoutOrder
-				})
 				
 				library:create("UIPadding", {
 					Parent = background,
