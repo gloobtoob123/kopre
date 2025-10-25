@@ -1789,22 +1789,147 @@
 					
 
 			-- playerlist 
-				local holder = library:panel({
-					name = "Playerlist", 
-					anchor_point = vec2(0, 0),
-					size = dim2(0, 529, 0, 445),
-					position = dim2(0, main_window.items.main_holder.AbsolutePosition.X - 531, 0, main_window.items.main_holder.AbsolutePosition.Y),
-					image = "rbxassetid://107070078834415",
-				})  
-				
-				local items = holder.items
+-- UI
+local holder = library:panel({
+	name = "Playerlist",
+	anchor_point = vec2(0, 0),
+	size = dim2(0, 529, 0, 445),
+	position = dim2(0, main_window.items.main_holder.AbsolutePosition.X - 531, 0, main_window.items.main_holder.AbsolutePosition.Y),
+	image = "rbxassetid://107070078834415",
+})
 
-				local column = setmetatable(items, library):column() 
-				local section = column:section({name = "Playerlist"})
-				local playerlist = section:playerlist({})
-				section:dropdown({name = "Priority", items = {"Enemy", "Priority", "Neutral", "Friendly"}, default = "Neutral", flag = "PLAYERLIST_DROPDOWN", callback = function(text)
-					library.prioritize(text)
-				end})
+local items   = holder.items
+local column  = setmetatable(items, library):column()
+local section = column:section({ name = "Playerlist" })
+local playerlist = section:playerlist({}) -- assumed to support a "selected" value or getter/callback
+
+----------------------------------------------------------------
+-- Spectate implementation
+----------------------------------------------------------------
+local Players        = game:GetService("Players")
+local RunService     = game:GetService("RunService")
+local LocalPlayer    = Players.LocalPlayer
+local Camera         = workspace.CurrentCamera
+
+local spectating     = false
+local stepConn       = nil
+local selectionConn  = nil
+local charAddedConns = {}
+local origSubject    = nil
+local origType       = nil
+
+local function getHumanoidFromCharacter(character)
+	if not character then return nil end
+	return character:FindFirstChildOfClass("Humanoid")
+end
+
+local function getSelectedPlayer()
+	-- Try common APIs used by custom UI libs; fall back to a field if present
+	if playerlist.get_selected then
+		return playerlist:get_selected()
+	elseif playerlist.get then
+		return playerlist:get()
+	elseif playerlist.selected then
+		return playerlist.selected
+	end
+	return nil
+end
+
+local function setCameraToPlayer(plr)
+	if not plr or not plr.Character then return end
+	local hum = getHumanoidFromCharacter(plr.Character)
+	if hum then
+		Camera.CameraType   = Enum.CameraType.Custom
+		Camera.CameraSubject = hum
+	end
+end
+
+local function cleanupCharConns()
+	for _, c in ipairs(charAddedConns) do
+		if c and c.Disconnect then c:Disconnect() end
+	end
+	table.clear(charAddedConns)
+end
+
+local function startSpectate()
+	if spectating then return end
+	spectating   = true
+	origSubject  = Camera.CameraSubject
+	origType     = Camera.CameraType
+
+	-- keep camera pinned to current selection each frame (robust against deaths / spawns)
+	stepConn = RunService.RenderStepped:Connect(function()
+		local sel = getSelectedPlayer()
+		if sel and sel.Character then
+			local hum = getHumanoidFromCharacter(sel.Character)
+			if hum and Camera.CameraSubject ~= hum then
+				Camera.CameraType    = Enum.CameraType.Custom
+				Camera.CameraSubject = hum
+			end
+		end
+	end)
+
+	-- follow respawns of the selected player (if the widget exposes a selection-changed signal, hook it too)
+	local function watchPlayer(plr)
+		if not plr then return end
+		table.insert(charAddedConns, plr.CharacterAdded:Connect(function(char)
+			local hum = getHumanoidFromCharacter(char)
+			if hum then
+				Camera.CameraType    = Enum.CameraType.Custom
+				Camera.CameraSubject = hum
+			end
+		end))
+	end
+
+	watchPlayer(getSelectedPlayer())
+
+	if playerlist.on_select then
+		selectionConn = playerlist:on_select(function(plr)
+			cleanupCharConns()
+			watchPlayer(plr)
+			setCameraToPlayer(plr)
+		end)
+	elseif playerlist.Bind and playerlist.Event == "Select" then
+		-- generic pattern some libs use
+		selectionConn = playerlist:Bind("Select", function(plr)
+			cleanupCharConns()
+			watchPlayer(plr)
+			setCameraToPlayer(plr)
+		end)
+	end
+
+	-- initial lock
+	setCameraToPlayer(getSelectedPlayer())
+end
+
+local function stopSpectate()
+	if not spectating then return end
+	spectating = false
+	if stepConn then stepConn:Disconnect() stepConn = nil end
+	if selectionConn then selectionConn:Disconnect() selectionConn = nil end
+	cleanupCharConns()
+
+	-- restore original camera state
+	if origType then Camera.CameraType = origType end
+	if origSubject then Camera.CameraSubject = origSubject end
+end
+
+----------------------------------------------------------------
+-- Toggle in the UI (replaces the old Priority dropdown)
+----------------------------------------------------------------
+section:toggle({
+	name = "Spectate",
+	flag = "PLAYERLIST_SPECTATE",
+	default = false,
+	callback = function(on)
+		if on then
+			startSpectate()
+		else
+			stopSpectate()
+		end
+	end
+})
+
 			--  
 
 			return setmetatable(window, library)
