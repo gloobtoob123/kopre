@@ -69,7 +69,7 @@
 
 -- library init
 	local library = {
-		directory = "rewind",
+		directory = "Atlanta",
 		folders = {
 			"/fonts",
 			"/configs",
@@ -107,12 +107,12 @@
 		preset = {
 			["outline"] = hex("#0A0A0A"), -- 
 			["inline"] = hex("#2D2D2D"), --
-			["accent"] = hex("#434343c7"), --
+			["accent"] = hex("#6078BE"), --
 			["high_contrast"] = hex("#141414"),
 			["low_contrast"] = hex("#1E1E1E"),
 			["text"] = hex("#B4B4B4"),
 			["text_outline"] = rgb(0, 0, 0),
-			["glow"] = hex("#505050ff"), 
+			["glow"] = hex("#6078BE"), 
 		},
 
 		utility = {
@@ -235,7 +235,6 @@ local arcadeFont = {
 		}
 	}
 }
-
 
 	writefile("dddd.ttf", http_service:JSONEncode(tahoma))
 
@@ -648,8 +647,8 @@ local arcadeFont = {
 		function library:panel(options) 
 			local cfg = {
 				name = options.text or options.name or "Window", 
-				size = options.size or dim2(0, 430, 0, 590),
-				position = dim2(0, 500, 0, 500),
+				size = options.size or dim2(0, 530, 0, 590),
+				position = options.position or dim2(0, 500, 0, 500),
 				anchor_point = options.anchor_point or vec2(0, 0),
 
 				-- button
@@ -1286,7 +1285,7 @@ local arcadeFont = {
 					BorderColor3 = rgb(0, 0, 0),
 					AnchorPoint = vec2(0.5, 0),
 					Position = dim2(0.5, 0, 0, 20),
-					Size = dim2(0, 140, 0, 39),
+					Size = dim2(0, 157, 0, 39),
 					BorderSizePixel = 0,
 					BackgroundColor3 = themes.preset.outline
 				}); 
@@ -1529,7 +1528,7 @@ local arcadeFont = {
 
 			-- main window
 				local main_window = library:panel({
-					name = properties and properties.name or "rewind | ", 
+					name = properties and properties.name or "Atlanta | ", 
 					size = dim2(0, 604, 0, 628),
 					position = dim2(0, (camera.ViewportSize.X / 2) - 302 - 96, 0, (camera.ViewportSize.Y / 2) - 421 - 12),
 					image = "rbxassetid://98823308062942",
@@ -1634,11 +1633,11 @@ local arcadeFont = {
 					image = "rbxassetid://115194686863276",
 				})
 
-				local watermark = library:watermark({default = os.date('rewind |  - %b %d %Y - %H:%M:%S')})  
+				local watermark = library:watermark({default = os.date('Atlanta |  - %b %d %Y - %H:%M:%S')})  
 
 				task.spawn(function()
 					while task.wait(1) do 
-						watermark.change_text(os.date('rewind - %b %d %Y - %H:%M:%S'))
+						watermark.change_text(os.date('Atlanta - Beta - %b %d %Y - %H:%M:%S'))
 					end 
 				end) 
 
@@ -1789,6 +1788,21 @@ local arcadeFont = {
 						blur:Destroy()
 					end})
 			-- 
+					
+			-- esp preview
+				local holder = library:panel({
+					name = "ESP Preview", 
+					anchor_point = vec2(0, 0),
+					size = dim2(0, 300, 0, 325),
+					position = dim2(0, style.items.main_holder.AbsolutePosition.X, 0, style.items.main_holder.AbsolutePosition.Y + style.items.main_holder.AbsoluteSize.Y + 2),
+					image = "rbxassetid://77684377836328",
+				})  
+				
+				local items = holder.items
+				
+				local column = setmetatable(items, library):column() 
+				window.esp_section = column:section({name = "Main"})
+			--  
 
 			-- playerlist 
 				local holder = library:panel({
