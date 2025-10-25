@@ -1282,7 +1282,7 @@
 					Parent = sgui,
 					Name = "",
 					Visible = true,
-					BorderColor3 = rgba(255, 0, 0, 0.5),
+					BorderColor3 = rgb(0, 0, 0),
 					AnchorPoint = vec2(0.5, 0),
 					Position = dim2(0.5, 0, 0, 20),
 					Size = dim2(0, 140, 0, 39),
@@ -1625,13 +1625,7 @@
 			-- 
 
 			-- theming 
-				local style = library:panel({
-					name = "Style", 
-					anchor_point = vec2(0, 0),
-					size = dim2(0, 394, 0, 464),
-					position = dim2(0, main_window.items.main_holder.AbsolutePosition.X + main_window.items.main_holder.AbsoluteSize.X + 2, 0, main_window.items.main_holder.AbsolutePosition.Y),
-					image = "rbxassetid://115194686863276",
-				})
+
 
 				local watermark = library:watermark({default = os.date('rewind |  - %b %d %Y - %H:%M:%S')})  
 
